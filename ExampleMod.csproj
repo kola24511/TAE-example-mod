@@ -1,0 +1,45 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <LangVersion>9.0</LangVersion>
+    <Nullable>enable</Nullable>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <AssemblyName>AdventurersEra.ExampleMod</AssemblyName>
+    <RootNamespace>ExampleMod</RootNamespace>
+    <!-- The manifest is the single source of the mod version. -->
+    <Version>$([System.Text.RegularExpressions.Regex]::Match($([System.IO.File]::ReadAllText('$(MSBuildProjectDirectory)/module.json')), '&quot;version&quot;\s*:\s*&quot;([^&quot;]+)&quot;').Groups[1].Value)</Version>
+    <PackageName>ExampleMod</PackageName>
+    <PackageDirectory>$(MSBuildProjectDirectory)/dist/package/$(PackageName)-$(Version)</PackageDirectory>
+    <PackageArchive>$(MSBuildProjectDirectory)/dist/$(PackageName)-$(Version).zip</PackageArchive>
+    <DefaultItemExcludes>$(DefaultItemExcludes);SDK/**;dist/**</DefaultItemExcludes>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="AdventurersEra.Modding.Api">
+      <HintPath>SDK/References/AdventurersEra.Modding.Api.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Compile Include="src/**/*.cs" />
+    <ModAsset Include="assets/**/*" />
+  </ItemGroup>
+  <Target Name="CheckSdk" BeforeTargets="ResolveAssemblyReferences">
+    <Error Condition="!Exists('SDK/References/AdventurersEra.Modding.Api.dll')" Text="Game SDK is missing: SDK/References/AdventurersEra.Modding.Api.dll" />
+  </Target>
+  <Target Name="PackageMod" AfterTargets="Build">
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(PackageDirectory)/Code" />
+    <Copy SourceFiles="$(MSBuildProjectDirectory)/module.json" DestinationFolder="$(PackageDirectory)" />
+    <Copy SourceFiles="@(ModAsset)" DestinationFiles="@(ModAsset->'$(PackageDirectory)/assets/%(RecursiveDir)%(Filename)%(Extension)')" />
+    <Message Importance="high" Text="Ready-to-install mod: $(PackageDirectory)" />
+  </Target>
+  <Target Name="ArchiveMod" AfterTargets="PackageMod">
+    <PropertyGroup>
+      <_ArchiveRoot>$(MSBuildProjectDirectory)/obj/mod-archive</_ArchiveRoot>
+    </PropertyGroup>
+    <RemoveDir Directories="$(_ArchiveRoot)" />
+    <ItemGroup>
+      <_PackageFile Include="$(PackageDirectory)/**/*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(_PackageFile)" DestinationFiles="@(_PackageFile->'$(_ArchiveRoot)/$(PackageName)-$(Version)/%(RecursiveDir)%(Filename)%(Extension)')" />
+    <ZipDirectory SourceDirectory="$(_ArchiveRoot)" DestinationFile="$(PackageArchive)" Overwrite="true" />
+    <Message Importance="high" Text="Archive: $(PackageArchive)" />
+  </Target>
+</Project>
