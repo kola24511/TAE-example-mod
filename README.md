@@ -19,11 +19,13 @@ build.sh             # Linux build script
 
 ## Build
 
-Install the **.NET SDK** and extract a compatible game SDK into `SDK/`.
-The API DLL must be located at:
+Install the **.NET SDK** and add the compatible game API DLL to the project.
+The build checks these paths in order and uses the first DLL found:
 
 ```text
-SDK/References/AdventurersEra.Modding.Api.dll
+SDK/TAE.SDK.dll
+TAE.SDK.dll
+SDK/References/TAE.SDK.dll
 ```
 
 On **Windows**, run `build.cmd`. On **Linux**, run this from the project folder:
@@ -46,7 +48,7 @@ dist/ExampleMod-1.0.0.zip        # Archive for distribution
 ```
 
 The version comes from `module.json`. The game SDK is not included in the package;
-add `SDK/` to `.gitignore`.
+The SDK folder and root API DLL are excluded by `.gitignore`.
 
 ## Installation
 
@@ -77,11 +79,13 @@ build.sh             # Сборка на Linux
 
 ## Сборка
 
-Установи **.NET SDK** и распакуй совместимый SDK игры в папку `SDK/`.
-DLL должна находиться по пути:
+Установи **.NET SDK** и добавь совместимую DLL API игры в проект.
+Сборка проверяет пути по порядку и использует первую найденную DLL:
 
 ```text
-SDK/References/AdventurersEra.Modding.Api.dll
+SDK/TAE.SDK.dll
+TAE.SDK.dll
+SDK/References/TAE.SDK.dll
 ```
 
 На **Windows** запусти `build.cmd`. На **Linux** из папки проекта выполни:
@@ -104,7 +108,7 @@ dist/ExampleMod-1.0.0.zip        # Архив для публикации
 ```
 
 Версия берётся из `module.json`. SDK в готовый пакет не входит;
-добавь `SDK/` в `.gitignore`.
+папка SDK и DLL API в корне исключены через `.gitignore`.
 
 ## Установка
 

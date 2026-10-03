@@ -11,18 +11,23 @@
     <PackageName>ExampleMod</PackageName>
     <PackageDirectory>$(MSBuildProjectDirectory)/dist/package/$(PackageName)-$(Version)</PackageDirectory>
     <PackageArchive>$(MSBuildProjectDirectory)/dist/$(PackageName)-$(Version).zip</PackageArchive>
-    <DefaultItemExcludes>$(DefaultItemExcludes);SDK/**;dist/**</DefaultItemExcludes>
+    <!-- Use the first available API DLL: SDK folder, project root, then legacy SDK layout. -->
+    <ModdingApiPath Condition="'$(ModdingApiPath)' == '' and Exists('$(MSBuildProjectDirectory)/SDK/TAE.SDK.dll')">$(MSBuildProjectDirectory)/SDK/TAE.SDK.dll</ModdingApiPath>
+    <ModdingApiPath Condition="'$(ModdingApiPath)' == '' and Exists('$(MSBuildProjectDirectory)/TAE.SDK.dll')">$(MSBuildProjectDirectory)/TAE.SDK.dll</ModdingApiPath>
+    <ModdingApiPath Condition="'$(ModdingApiPath)' == '' and Exists('$(MSBuildProjectDirectory)/SDK/References/TAE.SDK.dll')">$(MSBuildProjectDirectory)/SDK/References/TAE.SDK.dll</ModdingApiPath>
+    <DefaultItemExcludes>$(DefaultItemExcludes);SDK/**;TAE.SDK.dll;dist/**</DefaultItemExcludes>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="AdventurersEra.Modding.Api">
-      <HintPath>SDK/References/AdventurersEra.Modding.Api.dll</HintPath>
+      <HintPath>$(ModdingApiPath)</HintPath>
       <Private>false</Private>
     </Reference>
     <Compile Include="src/**/*.cs" />
     <ModAsset Include="assets/**/*" />
   </ItemGroup>
   <Target Name="CheckSdk" BeforeTargets="ResolveAssemblyReferences">
-    <Error Condition="!Exists('SDK/References/AdventurersEra.Modding.Api.dll')" Text="Game SDK is missing: SDK/References/AdventurersEra.Modding.Api.dll" />
+    <Error Condition="'$(ModdingApiPath)' == '' or !Exists('$(ModdingApiPath)')" Text="Game SDK is missing. Place TAE.SDK.dll in SDK/, next to ExampleMod.csproj, or in SDK/References/." />
+    <Message Importance="high" Text="Game SDK: $(ModdingApiPath)" />
   </Target>
   <Target Name="PackageMod" AfterTargets="Build">
     <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(PackageDirectory)/Code" />

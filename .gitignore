@@ -5,3 +5,5 @@ dist/
 .vs/
 *.user
 *.DotSettings.user
+SDK/
+/TAE.SDK.dll
